@@ -62,7 +62,11 @@ class LogStash::Inputs::Rss < LogStash::Inputs::Base
   def handle_response(response, queue)
     body = response.body
     begin
-      feed = RSS::Parser.parse(body)
+      begin
+        feed = RSS::Parser.parse(body)
+      rescue RSS::InvalidRSSError
+        feed = RSS::Parser.parse(body,false)
+      end
       feed.items.each do |item|
         # Put each item into an event
         @logger.debug("Item", :item => item.author)
